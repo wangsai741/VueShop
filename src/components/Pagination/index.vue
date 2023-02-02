@@ -1,0 +1,123 @@
+<template>
+  <div class="pagination">
+    <!-- 上 -->
+    <button :disabled="pageNo === 1" @click="$emit('getPageNo', pageNo - 1)">
+      上一页
+    </button>
+    <button
+      v-if="startNumEndNum.start > 1"
+      @click="$emit('getPageNo', 1)"
+      :class="{ active: (pageNo == 1) }"
+    >
+      1
+    </button>
+    <button v-if="startNumEndNum.start > 2">···</button>
+
+    <!-- 中间部分 -->
+    <button
+      v-for="(page, index) in startNumEndNum.end"
+      :key="index"
+      v-if="page >= startNumEndNum.start"
+      @click="$emit('getPageNo', page)"
+      :class="{active:pageNo == page}"
+    >
+      {{ page }}
+    </button>
+
+    <!-- 下 -->
+    <button v-if="startNumEndNum.end < totalPage - 1">···</button>
+    <button
+      v-if="startNumEndNum.end < totalPage"
+      @click="$emit('getPageNo', totalPage)"
+      :class="{active:pageNo == totalPage}"
+    >
+      {{ totalPage }}
+    </button>
+    <button
+      :disabled="pageNo === totalPage"
+      @click="$emit('getPageNo', pageNo + 1)"
+    >
+      下一页
+    </button>
+
+    <button style="margin-left: 30px">共 {{ total }} 条</button>
+  </div>
+</template>
+
+<script>
+export default {
+  name: "Pagination",
+  props: ["pageNo", "pageSize", "total", "continues"],
+  computed: {
+    // 总共的页数
+    totalPage() {
+      // 向上取整
+      return Math.ceil(this.total / this.pageSize);
+    },
+    // 计算页码的起始页面和结束页面
+    startNumEndNum() {
+      // 解构
+      const { continues, pageNo, totalPage } = this;
+      // 准备容器
+      let start = 0;
+      let end = 0;
+      // 判断,数据少,总页数少于展示的
+      if (totalPage < continues) {
+        start = 1;
+        end = totalPage;
+      } else {
+        // 正常,数据多,页面多
+        // 当前页 - (页面个数/2)取整
+        start = pageNo - parseInt(continues / 2);
+        end = pageNo + parseInt(continues / 2);
+        // 不正常的现象,start为0 或 负数
+        if (start < 1) {
+          start = 1;
+          end = continues;
+        }
+        // end大于总页数
+        if (end > totalPage) {
+          end = totalPage;
+          start = totalPage - continues + 1;
+        }
+      }
+      return { start, end };
+    },
+  },
+};
+</script>
+
+<style lang="less" scoped>
+.pagination {
+  text-align: center;
+  button {
+    margin: 0 5px;
+    background-color: #f4f4f5;
+    color: #606266;
+    outline: none;
+    border-radius: 2px;
+    padding: 0 4px;
+    vertical-align: top;
+    display: inline-block;
+    font-size: 13px;
+    min-width: 35.5px;
+    height: 28px;
+    line-height: 28px;
+    cursor: pointer;
+    box-sizing: border-box;
+    text-align: center;
+    border: 0;
+
+    &[disabled] {
+      color: #c0c4cc;
+      cursor: not-allowed;
+    }
+
+    &.active {
+      cursor: not-allowed;
+      background-color: #409eff;
+      color: #fff;
+    }
+  }
+}
+</style>

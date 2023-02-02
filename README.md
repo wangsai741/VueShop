@@ -1,4 +1,4 @@
-# vueshop
+# app
 
 ## Project setup
 ```
